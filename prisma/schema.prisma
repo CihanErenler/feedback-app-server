@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  isAdmin      Boolean   @default(false) @map("is_admin")
+  created_at   DateTime  @default(now())
+  posts        Post[]
+  comments     Comment[]
+  votes        Vote[]
+
+  @@map("users")
+}
+
+model Post {
+  id            String    @id @default(cuid())
+  title         String
+  description   String
+  type          String
+  status        String    @default("open")
+  pinned        Boolean   @default(false)
+  vote_count    Int       @default(0)
+  comment_count Int       @default(0)
+  tags          String[]  @default([])
+  created_at    DateTime  @default(now())
+  authorId      String    @map("author_id")
+  author        User      @relation(fields: [authorId], references: [id])
+  comments      Comment[]
+  votes         Vote[]
+
+  @@map("posts")
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  body       String
+  created_at DateTime @default(now())
+  postId     String   @map("post_id")
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId   String   @map("author_id")
+  author     User     @relation(fields: [authorId], references: [id])
+
+  @@map("comments")
+}
+
+model Vote {
+  id         String   @id @default(cuid())
+  postId     String   @map("post_id")
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  created_at DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@map("votes")
+}
+
+model ChangelogEntry {
+  id           String   @id @default(cuid())
+  version      String
+  title        String
+  body         String
+  date         DateTime
+  isNew        Boolean  @default(false) @map("is_new")
+  isMinor      Boolean  @default(false) @map("is_minor")
+  tags         String[]
+  linked_posts Json?
+  created_at   DateTime @default(now())
+
+  @@map("changelog_entries")
+}
