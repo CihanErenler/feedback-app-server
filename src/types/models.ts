@@ -42,8 +42,3 @@ export type ChangelogEntry = {
   tags: PostType[];
   linkedPosts?: { id: string; title: string }[];
 };
-
-export const posts: Post[] = [];
-export const comments: Comment[] = [];
-export const users: User[] = [];
-export const changelog: ChangelogEntry[] = [];
