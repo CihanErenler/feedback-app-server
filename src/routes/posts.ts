@@ -2,12 +2,12 @@ import { Router } from "express";
 import {
   getPosts,
   getPost,
-  createPost,
-  updatePost,
-  deletePost,
-  votePost,
+  createPostHandler,
+  updatePostHandler,
+  deletePostHandler,
+  votePostHandler,
   getComments,
-  createComment,
+  createCommentHandler,
 } from "../controllers/posts.controller";
 import { authenticate, requireAdmin } from "../middleware/auth";
 
@@ -15,12 +15,12 @@ const router = Router();
 
 router.get("/", getPosts);
 router.get("/:id", getPost);
-router.post("/", authenticate, createPost);
-router.patch("/:id", requireAdmin, updatePost);
-router.delete("/:id", requireAdmin, deletePost);
+router.post("/", authenticate, createPostHandler);
+router.patch("/:id", requireAdmin, updatePostHandler);
+router.delete("/:id", requireAdmin, deletePostHandler);
 
-router.post("/:id/vote", authenticate, votePost);
+router.post("/:id/vote", authenticate, votePostHandler);
 router.get("/:id/comments", getComments);
-router.post("/:id/comments", authenticate, createComment);
+router.post("/:id/comments", authenticate, createCommentHandler);
 
 export default router;
