@@ -23,14 +23,19 @@ export const authenticate = (
   _res: Response,
   next: NextFunction,
 ) => {
-  const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer ")) {
+  const token = req.cookies?.auth_token;
+  if (!token) {
     return next(new AppError(401, "Authentication required"));
   }
 
   try {
-    const token = header.split(" ")[1];
-    req.user = jwt.verify(token, getSecret()) as AuthUser;
+    const user = jwt.verify(token, getSecret()) as AuthUser;
+    req.user = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    };
     next();
   } catch {
     next(new AppError(401, "Invalid or expired token"));

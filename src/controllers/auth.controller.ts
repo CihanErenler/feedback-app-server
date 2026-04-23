@@ -37,7 +37,13 @@ export const login = async (
     };
     const token = generateToken(userToSend);
 
-    res.status(StatusCodes.OK).json({ user: userToSend, token });
+    res.cookie("auth_token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    res.status(StatusCodes.OK).json({ user: userToSend });
   } catch (err) {
     next(err);
   }
@@ -81,4 +87,13 @@ export const register = async (
 
 export const me = (req: Request, res: Response) => {
   res.json({ user: req.user });
+};
+
+export const logout = (_req: Request, res: Response) => {
+  res.clearCookie("auth_token", {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+  });
+  res.status(StatusCodes.NO_CONTENT).send();
 };
