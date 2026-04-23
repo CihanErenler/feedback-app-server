@@ -18,14 +18,18 @@ const getSecret = () => {
 export const generateToken = (user: AuthUser): string =>
   jwt.sign(user, getSecret(), { expiresIn: "7d" });
 
-export const authenticate = (req: Request, _res: Response, next: NextFunction) => {
+export const authenticate = (
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) => {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
     return next(new AppError(401, "Authentication required"));
   }
 
   try {
-    const token = header.slice(7);
+    const token = header.split(" ")[1];
     req.user = jwt.verify(token, getSecret()) as AuthUser;
     next();
   } catch {
@@ -33,10 +37,15 @@ export const authenticate = (req: Request, _res: Response, next: NextFunction) =
   }
 };
 
-export const requireAdmin = (req: Request, _res: Response, next: NextFunction) => {
+export const requireAdmin = (
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) => {
   authenticate(req, _res, (err) => {
     if (err) return next(err);
-    if (!req.user?.isAdmin) return next(new AppError(403, "Admin access required"));
+    if (!req.user?.isAdmin)
+      return next(new AppError(403, "Admin access required"));
     next();
   });
 };
