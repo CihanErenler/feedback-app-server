@@ -30,16 +30,16 @@ export const login = async (
     }
 
     const userToSend = {
-      name: user.name,
-      email: user.email,
       id: user.id,
+      email: user.email,
+      name: user.name,
       isAdmin: user.isAdmin,
     };
     const token = generateToken(userToSend);
 
     res.cookie("auth_token", token, {
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     });
 
@@ -67,19 +67,26 @@ export const register = async (
       );
     }
 
+    console.log(email);
+
     const user = await findUserByEmail(email);
 
+    console.log(user);
+
     if (user) {
-      throw new AppError(
+      const error = new AppError(
         StatusCodes.CONFLICT,
         "User with this email already exists",
       );
+      return next(error);
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const newUser = await createUser({ name, email, passwordHash });
+    await createUser({ name, email, passwordHash });
 
-    res.status(StatusCodes.CREATED).json({ user: newUser });
+    res
+      .status(StatusCodes.CREATED)
+      .json({ message: "User registered successfully" });
   } catch (err) {
     next(err);
   }

@@ -9,11 +9,12 @@ import {
   getComments,
   createComment,
 } from "../controllers/posts.controller";
+import { asyncWrapper } from "#utils/asyncWrapper.js";
 import { authenticate, requireAdmin } from "../middleware/auth";
 
 const router = Router();
 
-router.get("/", getPosts);
+router.get("/", asyncWrapper(getPosts));
 router.get("/:id", getPost);
 router.post("/", authenticate, createPost);
 router.patch("/:id", requireAdmin, updatePost);
